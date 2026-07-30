@@ -30,7 +30,9 @@ jobs:
           ${{ runner.os }}-php-
 
     - name: Configure GitHub OAuth for Composer
-      if: ${{ secrets.GH_COMPOSER_TOKEN != '' }}
+      if: ${{ env.GH_COMPOSER_TOKEN != '' }}
+      env:
+        GH_COMPOSER_TOKEN: ${{ secrets.GH_COMPOSER_TOKEN }}
       run: composer config --global github-oauth.github.com ${{ secrets.GH_COMPOSER_TOKEN }}
 
     - name: Install dependencies

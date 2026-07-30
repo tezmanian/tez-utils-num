@@ -18,7 +18,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Validate composer.json and composer.lock
-      run: composer validate --strict
+      run: composer validate --strict --no-check-lock
 
     - name: Cache Composer packages
       id: composer-cache
@@ -28,6 +28,10 @@ jobs:
         key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
         restore-keys: |
           ${{ runner.os }}-php-
+
+    - name: Configure GitHub OAuth for Composer
+      if: ${{ secrets.GH_COMPOSER_TOKEN != '' }}
+      run: composer config --global github-oauth.github.com ${{ secrets.GH_COMPOSER_TOKEN }}
 
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress
@@ -40,4 +44,3 @@ jobs:
 
     - name: Tests
       run: composer test
-

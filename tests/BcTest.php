@@ -355,7 +355,6 @@ final class BcTest extends TestCase
     public function testSumThrowsOnNonNumericElement(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        /** @phpstan-ignore-next-line */
         Bc::sum(['1', 'not-a-number', '3']);
     }
 
@@ -469,42 +468,36 @@ final class BcTest extends TestCase
     public function testAddThrowsOnNonNumericInput(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        /** @phpstan-ignore-next-line */
         Bc::add('not-a-number', '1');
     }
 
     public function testSubThrowsOnNonNumericInput(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        /** @phpstan-ignore-next-line */
         Bc::sub('5', 'abc');
     }
 
     public function testMulThrowsOnNonNumericInput(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        /** @phpstan-ignore-next-line */
         Bc::mul('x', '2');
     }
 
     public function testDivThrowsOnNonNumericInput(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        /** @phpstan-ignore-next-line */
         Bc::div('10', 'y');
     }
 
     public function testGtThrowsOnNonNumericInput(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        /** @phpstan-ignore-next-line */
         Bc::gt('bad', '1');
     }
 
     public function testLtThrowsOnNonNumericInput(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        /** @phpstan-ignore-next-line */
         Bc::lt('1', 'bad');
     }
 }

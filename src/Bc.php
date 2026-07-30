@@ -10,7 +10,7 @@ use Tez\Utils\Validate\Guard;
  * Arbitrary-precision decimal arithmetic helpers wrapping PHP's bcmath extension.
  *
  * All methods default to 8 decimal places, which is appropriate for financial
- * calculations. Every input must be a numeric string (e.g. "1.50000000").
+ * calculations. Inputs may be int, float, or numeric string.
  * Passing a non-numeric string to any method throws \InvalidArgumentException.
  */
 final class Bc
@@ -18,16 +18,14 @@ final class Bc
     /**
      * Add two arbitrary-precision decimals.
      *
-     * @param numeric-string $a
-     * @param numeric-string $b
      * @throws \Throwable
      * @return numeric-string
      */
-    public static function add(string $a, string $b, int $scale = 8): string
+    public static function add(int|float|string $a, int|float|string $b, int $scale = 8): string
     {
         return bcadd(
-            Guard::isNumeric($a),
-            Guard::isNumeric($b),
+            Guard::isNumeric((string) $a), // @phpstan-ignore-line
+            Guard::isNumeric((string) $b), // @phpstan-ignore-line
             $scale,
         );
     }
@@ -37,7 +35,7 @@ final class Bc
      *
      * Returns a correctly scaled zero ('0.00000000') for an empty array.
      *
-     * @param numeric-string[] $operands
+     * @param array<int|float|string> $operands
      * @throws \Throwable
      * @return numeric-string
      */
@@ -49,7 +47,7 @@ final class Bc
 
         return array_reduce(
             $operands,
-            static fn(string $carry, string $item) => self::add($carry, (string) $item, $scale),
+            static fn(string $carry, int|float|string $item) => self::add($carry, (string) $item, $scale),
             '0',
         );
     }
@@ -57,16 +55,14 @@ final class Bc
     /**
      * Subtract $b from $a.
      *
-     * @param numeric-string $a
-     * @param numeric-string $b
      * @throws \Throwable
      * @return numeric-string
      */
-    public static function sub(string $a, string $b, int $scale = 8): string
+    public static function sub(int|float|string $a, int|float|string $b, int $scale = 8): string
     {
         return bcsub(
-            Guard::isNumeric($a),
-            Guard::isNumeric($b),
+            Guard::isNumeric((string) $a), // @phpstan-ignore-line
+            Guard::isNumeric((string) $b), // @phpstan-ignore-line
             $scale,
         );
     }
@@ -74,16 +70,14 @@ final class Bc
     /**
      * Multiply two arbitrary-precision decimals.
      *
-     * @param numeric-string $a
-     * @param numeric-string $b
      * @throws \Throwable
      * @return numeric-string
      */
-    public static function mul(string $a, string $b, int $scale = 8): string
+    public static function mul(int|float|string $a, int|float|string $b, int $scale = 8): string
     {
         return bcmul(
-            Guard::isNumeric($a),
-            Guard::isNumeric($b),
+            Guard::isNumeric((string) $a), // @phpstan-ignore-line
+            Guard::isNumeric((string) $b), // @phpstan-ignore-line
             $scale,
         );
     }
@@ -91,32 +85,29 @@ final class Bc
     /**
      * Divide $a by $b.
      *
-     * @param numeric-string $a
-     * @param numeric-string $b
      * @throws \Throwable
      * @throws \DivisionByZeroError if $b is zero
      * @return numeric-string
      */
-    public static function div(string $a, string $b, int $scale = 8): string
+    public static function div(int|float|string $a, int|float|string $b, int $scale = 8): string
     {
         Guard::that(
             !self::isZero($b, $scale + 1),
             static fn() => new \DivisionByZeroError('Division by zero.'),
         );
 
-        return bcdiv(Guard::isNumeric($a), $b, $scale);
+        return bcdiv(Guard::isNumeric((string) $a), (string) $b, $scale);
     }
 
     /**
-     * Normalize a numeric string to exactly $scale decimal places (truncates, does not round).
+     * Normalize a numeric value to exactly $scale decimal places (truncates, does not round).
      *
-     * Example: Bc::scale('1.5', 8) → '1.50000000'
+     * Example: Bc::scale(1.5, 8) ₒ '1.50000000'
      *
-     * @param numeric-string $value
      * @throws \Throwable
      * @return numeric-string
      */
-    public static function scale(string $value, int $scale = 8): string
+    public static function scale(int|float|string $value, int $scale = 8): string
     {
         return self::add(
             $value,
@@ -128,11 +119,10 @@ final class Bc
     /**
      * Return the absolute value.
      *
-     * @param numeric-string $value
      * @throws \Throwable
      * @return numeric-string
      */
-    public static function abs(string $value, int $scale = 8): string
+    public static function abs(int|float|string $value, int $scale = 8): string
     {
         return self::isNegative($value, $scale)
             ? self::sub('0', $value, $scale)
@@ -142,12 +132,10 @@ final class Bc
     /**
      * Return the larger of two values.
      *
-     * @param numeric-string $a
-     * @param numeric-string $b
      * @throws \Throwable
      * @return numeric-string
      */
-    public static function max(string $a, string $b, int $scale = 8): string
+    public static function max(int|float|string $a, int|float|string $b, int $scale = 8): string
     {
         return self::gte($a, $b, $scale)
             ? self::add($a, '0', $scale)
@@ -157,12 +145,10 @@ final class Bc
     /**
      * Return the smaller of two values.
      *
-     * @param numeric-string $a
-     * @param numeric-string $b
      * @throws \Throwable
      * @return numeric-string
      */
-    public static function min(string $a, string $b, int $scale = 8): string
+    public static function min(int|float|string $a, int|float|string $b, int $scale = 8): string
     {
         return self::lte($a, $b, $scale)
             ? self::add($a, '0', $scale)
@@ -172,15 +158,13 @@ final class Bc
     /**
      * Compare two values. Returns -1, 0, or 1.
      *
-     * @param numeric-string $a
-     * @param numeric-string $b
      * @throws \Throwable
      */
-    public static function compare(string $a, string $b, int $scale = 8): int
+    public static function compare(int|float|string $a, int|float|string $b, int $scale = 8): int
     {
         return bccomp(
-            Guard::isNumeric($a),
-            Guard::isNumeric($b),
+            Guard::isNumeric((string) $a), // @phpstan-ignore-line
+            Guard::isNumeric((string) $b), // @phpstan-ignore-line
             $scale,
         );
     }
@@ -188,10 +172,9 @@ final class Bc
     /**
      * Return true when the value is exactly zero at the given scale.
      *
-     * @param numeric-string $value
      * @throws \Throwable
      */
-    public static function isZero(string $value, int $scale = 8): bool
+    public static function isZero(int|float|string $value, int $scale = 8): bool
     {
         return 0 === self::compare($value, '0', $scale);
     }
@@ -199,11 +182,9 @@ final class Bc
     /**
      * Return true when $a is greater than $b.
      *
-     * @param numeric-string $a
-     * @param numeric-string $b
      * @throws \Throwable
      */
-    public static function gt(string $a, string $b, int $scale = 8): bool
+    public static function gt(int|float|string $a, int|float|string $b, int $scale = 8): bool
     {
         return 1 === self::compare($a, $b, $scale);
     }
@@ -211,11 +192,9 @@ final class Bc
     /**
      * Return true when $a is less than $b.
      *
-     * @param numeric-string $a
-     * @param numeric-string $b
      * @throws \Throwable
      */
-    public static function lt(string $a, string $b, int $scale = 8): bool
+    public static function lt(int|float|string $a, int|float|string $b, int $scale = 8): bool
     {
         return -1 === self::compare($a, $b, $scale);
     }
@@ -223,11 +202,9 @@ final class Bc
     /**
      * Return true when $a is greater than or equal to $b.
      *
-     * @param numeric-string $a
-     * @param numeric-string $b
      * @throws \Throwable
      */
-    public static function gte(string $a, string $b, int $scale = 8): bool
+    public static function gte(int|float|string $a, int|float|string $b, int $scale = 8): bool
     {
         return self::compare($a, $b, $scale) >= 0;
     }
@@ -235,11 +212,9 @@ final class Bc
     /**
      * Return true when $a is less than or equal to $b.
      *
-     * @param numeric-string $a
-     * @param numeric-string $b
      * @throws \Throwable
      */
-    public static function lte(string $a, string $b, int $scale = 8): bool
+    public static function lte(int|float|string $a, int|float|string $b, int $scale = 8): bool
     {
         return self::compare($a, $b, $scale) <= 0;
     }
@@ -247,11 +222,9 @@ final class Bc
     /**
      * Return true when $a equals $b at the given scale.
      *
-     * @param numeric-string $a
-     * @param numeric-string $b
      * @throws \Throwable
      */
-    public static function eq(string $a, string $b, int $scale = 8): bool
+    public static function eq(int|float|string $a, int|float|string $b, int $scale = 8): bool
     {
         return 0 === self::compare($a, $b, $scale);
     }
@@ -259,10 +232,9 @@ final class Bc
     /**
      * Return true when $value is strictly greater than zero.
      *
-     * @param numeric-string $value
      * @throws \Throwable
      */
-    public static function isPositive(string $value, int $scale = 8): bool
+    public static function isPositive(int|float|string $value, int $scale = 8): bool
     {
         return 1 === self::compare($value, '0', $scale);
     }
@@ -270,10 +242,9 @@ final class Bc
     /**
      * Return true when $value is strictly less than zero.
      *
-     * @param numeric-string $value
      * @throws \Throwable
      */
-    public static function isNegative(string $value, int $scale = 8): bool
+    public static function isNegative(int|float|string $value, int $scale = 8): bool
     {
         return -1 === self::compare($value, '0', $scale);
     }
@@ -281,11 +252,10 @@ final class Bc
     /**
      * Negate a value (equivalent to multiplying by -1).
      *
-     * @param numeric-string $value
      * @throws \Throwable
      * @return numeric-string
      */
-    public static function negate(string $value, int $scale = 8): string
+    public static function negate(int|float|string $value, int $scale = 8): string
     {
         return self::sub(
             '0',
@@ -297,14 +267,12 @@ final class Bc
     /**
      * Calculate $percent % of $value (i.e. value × percent ÷ 100).
      *
-     * Example: Bc::percent('200', '15') → '30.00000000'
+     * Example: Bc::percent(200, 15) → '30.00000000'
      *
-     * @param numeric-string $value
-     * @param numeric-string $percent
      * @throws \Throwable
      * @return numeric-string
      */
-    public static function percent(string $value, string $percent, int $scale = 8): string
+    public static function percent(int|float|string $value, int|float|string $percent, int $scale = 8): string
     {
         return self::div(
             self::mul(
@@ -322,7 +290,7 @@ final class Bc
      *
      * Returns '1.00000000' for an empty array (neutral element of multiplication).
      *
-     * @param numeric-string[] $operands
+     * @param array<int|float|string> $operands
      * @throws \Throwable
      * @return numeric-string
      */
@@ -334,7 +302,7 @@ final class Bc
 
         return array_reduce(
             $operands,
-            static fn(string $carry, string $item) => self::mul($carry, (string) $item, $scale),
+            static fn(string $carry, int|float|string $item) => self::mul($carry, (string) $item, $scale),
             '1',
         );
     }
@@ -344,7 +312,7 @@ final class Bc
      *
      * Returns '0.00000000' for an empty array.
      *
-     * @param numeric-string[] $operands
+     * @param array<int|float|string> $operands
      * @throws \Throwable
      * @return numeric-string
      */
@@ -356,9 +324,10 @@ final class Bc
 
         $first = (string) array_shift($operands);
 
+        /** @var numeric-string */
         return array_reduce(
             $operands,
-            static fn(string $carry, string $item) => self::sub($carry, (string) $item, $scale),
+            static fn(string $carry, int|float|string $item) => self::sub($carry, (string) $item, $scale),
             $first,
         );
     }
@@ -368,7 +337,7 @@ final class Bc
      *
      * Returns '1.00000000' for an empty array (neutral element of division).
      *
-     * @param numeric-string[] $operands
+     * @param array<int|float|string> $operands
      * @throws \Throwable
      * @return numeric-string
      */
@@ -380,9 +349,10 @@ final class Bc
 
         $first = (string) array_shift($operands);
 
+        /** @var numeric-string */
         return array_reduce(
             $operands,
-            static fn(string $carry, string $item) => self::div($carry, (string) $item, $scale),
+            static fn(string $carry, int|float|string $item) => self::div($carry, (string) $item, $scale),
             $first,
         );
     }

@@ -14,13 +14,9 @@
         }
     },
     "repositories": [
-  	{
-             "type": "git",
-             "url": "https://gitea.root-zone.info/tez/tez-utils-validate.git"
-        },
         {
-             "type": "git",
-             "url": "https://github.com/tezmanian/tez-utils-validate.git"
+            "type": "git",
+            "url": "https://github.com/tezmanian/tez-utils-validate.git"
         }
     ],
     "require": {

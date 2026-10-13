@@ -1,32 +1,40 @@
 {
-    "name": "tez/utils-num",
+    "name": "tezmanian/utils-num",
     "type": "library",
     "description": "PHP number utilities: formatting, byte sizes, percentage, clamping, and rounding helpers (Num), plus arbitrary-precision decimal arithmetic via bcmath (Bc). PHP 8.3+, requires ext-bcmath.",
+    "keywords": [
+        "number",
+        "bcmath",
+        "decimal",
+        "format",
+        "php"
+    ],
+    "homepage": "https://github.com/tezmanian/tez-utils-num",
     "license": "MIT",
+    "authors": [
+        {
+            "name": "René Halberstadt",
+            "email": "tezmanian@gmail.com"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/tezmanian/tez-utils-num/issues",
+        "source": "https://github.com/tezmanian/tez-utils-num"
+    },
     "autoload": {
         "psr-4": {
-            "Tez\\Utils\\Num\\": "src/"
+            "Tezmanian\\Utils\\Num\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Tez\\Utils\\Tests\\Num\\": "tests/"
+            "Tezmanian\\Utils\\Tests\\Num\\": "tests/"
         }
     },
-    "repositories": [
-  	{
-             "type": "git",
-             "url": "https://gitea.root-zone.info/tez/tez-utils-validate.git"
-        },
-        {
-             "type": "git",
-             "url": "https://github.com/tezmanian/tez-utils-validate.git"
-        }
-    ],
     "require": {
         "php": ">=8.3",
         "ext-bcmath": "*",
-        "tez/utils-validate": "^1.0"
+        "tezmanian/utils-validate": "^1.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^11.0",

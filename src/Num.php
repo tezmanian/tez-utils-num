@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tez\Utils\Num;
+namespace Tezmanian\Utils\Num;
 
 /**
  * Number formatting helpers: decimal, byte sizes, percentages, and rounding.

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Tez\Utils\Num;
+namespace Tezmanian\Utils\Num;
 
-use Tez\Utils\Validate\Guard;
+use Tezmanian\Utils\Validate\Guard;
 
 /**
  * Arbitrary-precision decimal arithmetic helpers wrapping PHP's bcmath extension.

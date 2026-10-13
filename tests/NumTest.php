@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Tez\Utils\Tests\Num;
+namespace Tezmanian\Utils\Tests\Num;
 
 use PHPUnit\Framework\TestCase;
-use Tez\Utils\Num\Num;
+use Tezmanian\Utils\Num\Num;
 
 final class NumTest extends TestCase
 {

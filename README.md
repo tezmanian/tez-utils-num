@@ -1,12 +1,19 @@
 # tez-utils-num
 
+[![CI](https://github.com/tezmanian/tez-utils-num/actions/workflows/php.yml/badge.svg)](https://github.com/tezmanian/tez-utils-num/actions/workflows/php.yml)
+[![Packagist Version](https://img.shields.io/packagist/v/tezmanian/utils-num)](https://packagist.org/packages/tezmanian/utils-num)
+[![PHP](https://img.shields.io/packagist/php-v/tezmanian/utils-num)](https://packagist.org/packages/tezmanian/utils-num)
+[![License: MIT](https://img.shields.io/packagist/l/tezmanian/utils-num)](LICENSE)
+
 PHP number utilities: formatting, byte sizes, percentage, clamping, and rounding helpers (`Num`), plus arbitrary-precision decimal arithmetic via bcmath (`Bc`). PHP 8.3+, requires `ext-bcmath`.
 
 ## Installation
 
 ```bash
-composer require tez/utils-num
+composer require tezmanian/utils-num
 ```
+
+Package: [`tezmanian/utils-num`](https://packagist.org/packages/tezmanian/utils-num) · Namespace: `Tezmanian\Utils\Num`
 
 ## Components
 
@@ -24,7 +31,7 @@ Formatting and rounding helpers for everyday number display.
 ### format()
 
 ```php
-use Tez\Utils\Num\Num;
+use Tezmanian\Utils\Num\Num;
 
 Num::format(1234567.891);                              // '1,234,567.89'
 Num::format(1234567.891, dec: ',', thousands: '.');    // '1.234.567,89'
@@ -90,7 +97,7 @@ The default scale is **8 decimal places** for all methods.
 ### Arithmetic
 
 ```php
-use Tez\Utils\Num\Bc;
+use Tezmanian\Utils\Num\Bc;
 
 Bc::add('10.5', '20.3');          // '30.80000000'
 Bc::sub('20.3', '11.1');          // '9.20000000'
@@ -158,8 +165,17 @@ Bc::eq('5.001', '5.009');           // false
 
 - PHP 8.3+
 - `ext-bcmath`
-- `tez/utils-validate` ^1.0
+- [`tezmanian/utils-validate`](https://packagist.org/packages/tezmanian/utils-validate) ^1.0
+
+## Development
+
+```bash
+make build && make install
+make ci   # audit, PHPStan, code style, tests
+```
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE).
+
+Author: René Halberstadt

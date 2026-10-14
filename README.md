@@ -5,7 +5,7 @@
 [![PHP](https://img.shields.io/packagist/php-v/tezmanian/utils-num)](https://packagist.org/packages/tezmanian/utils-num)
 [![License: MIT](https://img.shields.io/packagist/l/tezmanian/utils-num)](LICENSE)
 
-PHP number utilities: formatting, byte sizes, percentage, clamping, and rounding helpers (`Num`), plus arbitrary-precision decimal arithmetic via bcmath (`Bc`). PHP 8.3+, requires `ext-bcmath`.
+PHP number utilities: formatting, byte sizes, percentage, clamping, and rounding helpers (`Num`), plus arbitrary-precision decimal arithmetic via bcmath (`Bc`). PHP 8.3+, `ext-bcmath` is optional and only needed for `Bc`.
 
 ## Installation
 
@@ -90,7 +90,7 @@ Num::roundTo(1.7, 0.5); // 1.5
 
 Arbitrary-precision decimal arithmetic wrapping PHP's `bcmath` extension. Designed for financial calculations where floating-point imprecision is not acceptable.
 
-**All inputs must be numeric strings** (e.g. `'1.50000000'`). Passing a non-numeric string throws `\InvalidArgumentException`. Division by zero throws `\DivisionByZeroError`.
+**All inputs must be numeric strings** (e.g. `'1.50000000'`). Passing a non-numeric string throws `\InvalidArgumentException`. Division or modulo by zero (and zero raised to a negative power) throws `\DivisionByZeroError`. `Bc::pow()` with a fractional exponent and `Bc::sqrt()` of a negative value throw `\InvalidArgumentException`.
 
 The default scale is **8 decimal places** for all methods.
 
@@ -104,6 +104,9 @@ Bc::sub('20.3', '11.1');          // '9.20000000'
 Bc::mul('4', '5');                 // '20.00000000'
 Bc::div('1', '3');                 // '0.33333333'
 Bc::div('1', '3', scale: 2);      // '0.33'
+Bc::pow('2', '10');                // '1024.00000000'  (integer exponents only, negative allowed)
+Bc::sqrt('2');                     // '1.41421356'
+Bc::mod('10', '3');                // '1.00000000'     (sign follows the dividend)
 
 // Array operations
 Bc::sum(['1', '2', '3']);          // '6.00000000'
@@ -125,6 +128,8 @@ Bc::min('10', '3');                // '3.00000000'
 Bc::scale('1.5');                  // '1.50000000'  — normalize to 8 decimal places
 Bc::scale('1.123456789');          // '1.12345678'  — truncates, does not round
 Bc::percent('200', '15');          // '30.00000000' — 15% of 200
+Bc::floor('-1.5');               // '-2.00000000' — towards negative infinity
+Bc::ceil('1.2');                  // '2.00000000'  — towards positive infinity
 ```
 
 ### Comparisons
@@ -164,7 +169,7 @@ Bc::eq('5.001', '5.009');           // false
 ## Requirements
 
 - PHP 8.3+
-- `ext-bcmath`
+- `ext-bcmath` (optional, only needed for `Bc`)
 - [`tezmanian/utils-validate`](https://packagist.org/packages/tezmanian/utils-validate) ^1.0
 
 ## Development

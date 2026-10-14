@@ -1,7 +1,7 @@
 {
     "name": "tezmanian/utils-num",
     "type": "library",
-    "description": "PHP number utilities: formatting, byte sizes, percentage, clamping, and rounding helpers (Num), plus arbitrary-precision decimal arithmetic via bcmath (Bc). PHP 8.3+, requires ext-bcmath.",
+    "description": "PHP number utilities: formatting, byte sizes, percentage, clamping, and rounding helpers (Num), plus arbitrary-precision decimal arithmetic via bcmath (Bc). PHP 8.3+, ext-bcmath is optional and only needed for Bc.",
     "keywords": [
         "number",
         "bcmath",
@@ -33,8 +33,10 @@
     },
     "require": {
         "php": ">=8.3",
-        "ext-bcmath": "*",
         "tezmanian/utils-validate": "^1.0"
+    },
+    "suggest": {
+        "ext-bcmath": "Required for the Bc class (arbitrary-precision decimal arithmetic)"
     },
     "require-dev": {
         "phpunit/phpunit": "^11.0",

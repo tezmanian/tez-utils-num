@@ -25,6 +25,8 @@ final class Bc
      */
     public static function add(string $a, string $b, int $scale = 8): string
     {
+        self::requireBcmath();
+
         return bcadd(
             Guard::isNumeric($a),
             Guard::isNumeric($b),
@@ -43,6 +45,8 @@ final class Bc
      */
     public static function sum(array $operands, int $scale = 8): string
     {
+        self::requireBcmath();
+
         if ($operands === []) {
             return self::add('0', '0', $scale);
         }
@@ -64,6 +68,8 @@ final class Bc
      */
     public static function sub(string $a, string $b, int $scale = 8): string
     {
+        self::requireBcmath();
+
         return bcsub(
             Guard::isNumeric($a),
             Guard::isNumeric($b),
@@ -81,6 +87,8 @@ final class Bc
      */
     public static function mul(string $a, string $b, int $scale = 8): string
     {
+        self::requireBcmath();
+
         return bcmul(
             Guard::isNumeric($a),
             Guard::isNumeric($b),
@@ -99,12 +107,135 @@ final class Bc
      */
     public static function div(string $a, string $b, int $scale = 8): string
     {
+        self::requireBcmath();
+
         Guard::that(
             !self::isZero($b, $scale + 1),
             static fn() => new \DivisionByZeroError('Division by zero.'),
         );
 
         return bcdiv(Guard::isNumeric($a), $b, $scale);
+    }
+
+    /**
+     * Raise $base to an integer power.
+     *
+     * Negative exponents are supported (Bc::pow('2', '-2') → '0.25000000').
+     *
+     * @param numeric-string $base
+     * @param numeric-string $exponent must be an integer value (e.g. '3' or '3.0')
+     * @throws \Throwable
+     * @throws \InvalidArgumentException if $exponent has a fractional part
+     * @throws \DivisionByZeroError if $base is zero and $exponent is negative
+     * @return numeric-string
+     */
+    public static function pow(string $base, string $exponent, int $scale = 8): string
+    {
+        self::requireBcmath();
+
+        Guard::isNumeric($base);
+        Guard::isNumeric($exponent);
+        Guard::that(
+            1 === preg_match('/^[+-]?\d+(\.0*)?$/', $exponent),
+            static fn() => new \InvalidArgumentException('Exponent must be an integer.'),
+        );
+        $exponent = bcadd($exponent, '0', 0);
+
+        Guard::that(
+            !(self::isZero($base, $scale + 1) && self::isNegative($exponent, 0)),
+            static fn() => new \DivisionByZeroError('Zero cannot be raised to a negative power.'),
+        );
+
+        return bcpow($base, $exponent, $scale);
+    }
+
+    /**
+     * Square root of $value.
+     *
+     * @param numeric-string $value
+     * @throws \Throwable
+     * @throws \InvalidArgumentException if $value is negative
+     * @return numeric-string
+     */
+    public static function sqrt(string $value, int $scale = 8): string
+    {
+        self::requireBcmath();
+
+        Guard::isNumeric($value);
+        Guard::that(
+            !self::isNegative($value, $scale + 1),
+            static fn() => new \InvalidArgumentException('Cannot calculate the square root of a negative number.'),
+        );
+
+        return bcsqrt($value, $scale);
+    }
+
+    /**
+     * Remainder of $a divided by $b. The result takes the sign of $a.
+     *
+     * Example: Bc::mod('10', '3') → '1.00000000'
+     *
+     * @param numeric-string $a
+     * @param numeric-string $b
+     * @throws \Throwable
+     * @throws \DivisionByZeroError if $b is zero
+     * @return numeric-string
+     */
+    public static function mod(string $a, string $b, int $scale = 8): string
+    {
+        self::requireBcmath();
+
+        Guard::isNumeric($a);
+        Guard::that(
+            !self::isZero($b, $scale + 1),
+            static fn() => new \DivisionByZeroError('Modulo by zero.'),
+        );
+
+        return bcmod($a, $b, $scale);
+    }
+
+    /**
+     * Round down to the nearest integer (towards negative infinity).
+     *
+     * Example: Bc::floor('-1.5') → '-2.00000000'
+     *
+     * @param numeric-string $value
+     * @throws \Throwable
+     * @return numeric-string
+     */
+    public static function floor(string $value, int $scale = 8): string
+    {
+        self::requireBcmath();
+
+        $integer = bcadd(Guard::isNumeric($value), '0', 0);
+
+        if ('-' === $value[0] && self::hasFraction($value)) {
+            $integer = bcsub($integer, '1', 0);
+        }
+
+        return self::scale($integer, $scale);
+    }
+
+    /**
+     * Round up to the nearest integer (towards positive infinity).
+     *
+     * Example: Bc::ceil('1.2') → '2.00000000'
+     *
+     * @param numeric-string $value
+     * @throws \Throwable
+     * @return numeric-string
+     */
+    public static function ceil(string $value, int $scale = 8): string
+    {
+        self::requireBcmath();
+
+        $integer = bcadd(Guard::isNumeric($value), '0', 0);
+
+        if ('-' !== $value[0] && self::hasFraction($value)) {
+            $integer = bcadd($integer, '1', 0);
+        }
+
+        return self::scale($integer, $scale);
     }
 
     /**
@@ -118,6 +249,8 @@ final class Bc
      */
     public static function scale(string $value, int $scale = 8): string
     {
+        self::requireBcmath();
+
         return self::add(
             $value,
             '0',
@@ -134,6 +267,8 @@ final class Bc
      */
     public static function abs(string $value, int $scale = 8): string
     {
+        self::requireBcmath();
+
         return self::isNegative($value, $scale)
             ? self::sub('0', $value, $scale)
             : self::add($value, '0', $scale);
@@ -149,6 +284,8 @@ final class Bc
      */
     public static function max(string $a, string $b, int $scale = 8): string
     {
+        self::requireBcmath();
+
         return self::gte($a, $b, $scale)
             ? self::add($a, '0', $scale)
             : self::add($b, '0', $scale);
@@ -164,6 +301,8 @@ final class Bc
      */
     public static function min(string $a, string $b, int $scale = 8): string
     {
+        self::requireBcmath();
+
         return self::lte($a, $b, $scale)
             ? self::add($a, '0', $scale)
             : self::add($b, '0', $scale);
@@ -178,6 +317,8 @@ final class Bc
      */
     public static function compare(string $a, string $b, int $scale = 8): int
     {
+        self::requireBcmath();
+
         return bccomp(
             Guard::isNumeric($a),
             Guard::isNumeric($b),
@@ -193,6 +334,8 @@ final class Bc
      */
     public static function isZero(string $value, int $scale = 8): bool
     {
+        self::requireBcmath();
+
         return 0 === self::compare($value, '0', $scale);
     }
 
@@ -205,6 +348,8 @@ final class Bc
      */
     public static function gt(string $a, string $b, int $scale = 8): bool
     {
+        self::requireBcmath();
+
         return 1 === self::compare($a, $b, $scale);
     }
 
@@ -217,6 +362,8 @@ final class Bc
      */
     public static function lt(string $a, string $b, int $scale = 8): bool
     {
+        self::requireBcmath();
+
         return -1 === self::compare($a, $b, $scale);
     }
 
@@ -229,6 +376,8 @@ final class Bc
      */
     public static function gte(string $a, string $b, int $scale = 8): bool
     {
+        self::requireBcmath();
+
         return self::compare($a, $b, $scale) >= 0;
     }
 
@@ -241,6 +390,8 @@ final class Bc
      */
     public static function lte(string $a, string $b, int $scale = 8): bool
     {
+        self::requireBcmath();
+
         return self::compare($a, $b, $scale) <= 0;
     }
 
@@ -253,6 +404,8 @@ final class Bc
      */
     public static function eq(string $a, string $b, int $scale = 8): bool
     {
+        self::requireBcmath();
+
         return 0 === self::compare($a, $b, $scale);
     }
 
@@ -264,6 +417,8 @@ final class Bc
      */
     public static function isPositive(string $value, int $scale = 8): bool
     {
+        self::requireBcmath();
+
         return 1 === self::compare($value, '0', $scale);
     }
 
@@ -275,6 +430,8 @@ final class Bc
      */
     public static function isNegative(string $value, int $scale = 8): bool
     {
+        self::requireBcmath();
+
         return -1 === self::compare($value, '0', $scale);
     }
 
@@ -287,6 +444,8 @@ final class Bc
      */
     public static function negate(string $value, int $scale = 8): string
     {
+        self::requireBcmath();
+
         return self::sub(
             '0',
             $value,
@@ -306,6 +465,8 @@ final class Bc
      */
     public static function percent(string $value, string $percent, int $scale = 8): string
     {
+        self::requireBcmath();
+
         return self::div(
             self::mul(
                 $value,
@@ -328,6 +489,8 @@ final class Bc
      */
     public static function product(array $operands, int $scale = 8): string
     {
+        self::requireBcmath();
+
         if ($operands === []) {
             return self::add('1', '0', $scale);
         }
@@ -350,6 +513,8 @@ final class Bc
      */
     public static function subAll(array $operands, int $scale = 8): string
     {
+        self::requireBcmath();
+
         if ($operands === []) {
             return self::add('0', '0', $scale);
         }
@@ -374,6 +539,8 @@ final class Bc
      */
     public static function divAll(array $operands, int $scale = 8): string
     {
+        self::requireBcmath();
+
         if ($operands === []) {
             return self::add('1', '0', $scale);
         }
@@ -385,5 +552,20 @@ final class Bc
             static fn(string $carry, string $item) => self::div($carry, (string) $item, $scale),
             $first,
         );
+    }
+
+    private static function hasFraction(string $value): bool
+    {
+        return 1 === preg_match('/\.\d*[1-9]/', $value);
+    }
+
+    /**
+     * @throws \RuntimeException when ext-bcmath is not loaded
+     */
+    private static function requireBcmath(): void
+    {
+        if (!\extension_loaded('bcmath')) {
+            throw new \RuntimeException('The bcmath extension is required to use ' . self::class . '.');
+        }
     }
 }

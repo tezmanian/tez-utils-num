@@ -100,6 +100,162 @@ final class BcTest extends TestCase
         Bc::div('1', '0.00000000');
     }
 
+    // ── pow ──────────────────────────────────────────────────────────────────
+
+    public function testPow(): void
+    {
+        self::assertSame('8.00000000', Bc::pow('2', '3'));
+    }
+
+    public function testPowDecimalBase(): void
+    {
+        self::assertSame('2.25000000', Bc::pow('1.5', '2'));
+    }
+
+    public function testPowZeroExponent(): void
+    {
+        self::assertSame('1.00000000', Bc::pow('7', '0'));
+    }
+
+    public function testPowNegativeExponent(): void
+    {
+        self::assertSame('0.25000000', Bc::pow('2', '-2'));
+    }
+
+    public function testPowIntegerValuedDecimalExponent(): void
+    {
+        self::assertSame('8.00', Bc::pow('2', '3.0', 2));
+    }
+
+    public function testPowFractionalExponentThrows(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        Bc::pow('4', '0.5');
+    }
+
+    public function testPowZeroToNegativePowerThrows(): void
+    {
+        $this->expectException(\DivisionByZeroError::class);
+        Bc::pow('0', '-1');
+    }
+
+    public function testPowThrowsOnNonNumericInput(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        /** @phpstan-ignore-next-line */
+        Bc::pow('x', '2');
+    }
+
+    // ── sqrt ─────────────────────────────────────────────────────────────────
+
+    public function testSqrtPerfectSquare(): void
+    {
+        self::assertSame('3.00000000', Bc::sqrt('9'));
+    }
+
+    public function testSqrtIrrational(): void
+    {
+        self::assertSame('1.41421356', Bc::sqrt('2'));
+    }
+
+    public function testSqrtZero(): void
+    {
+        self::assertSame('0.00000000', Bc::sqrt('0'));
+    }
+
+    public function testSqrtCustomScale(): void
+    {
+        self::assertSame('1.41', Bc::sqrt('2', 2));
+    }
+
+    public function testSqrtNegativeThrows(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        Bc::sqrt('-1');
+    }
+
+    // ── mod ──────────────────────────────────────────────────────────────────
+
+    public function testMod(): void
+    {
+        self::assertSame('1.00000000', Bc::mod('10', '3'));
+    }
+
+    public function testModDecimal(): void
+    {
+        self::assertSame('0.50000000', Bc::mod('5.5', '2.5'));
+    }
+
+    public function testModNegativeDividendKeepsSign(): void
+    {
+        self::assertSame('-1.00000000', Bc::mod('-10', '3'));
+    }
+
+    public function testModByZeroThrows(): void
+    {
+        $this->expectException(\DivisionByZeroError::class);
+        Bc::mod('10', '0');
+    }
+
+    // ── floor / ceil ─────────────────────────────────────────────────────────
+
+    public function testFloorPositive(): void
+    {
+        self::assertSame('1.00000000', Bc::floor('1.9'));
+    }
+
+    public function testFloorNegative(): void
+    {
+        self::assertSame('-2.00000000', Bc::floor('-1.1'));
+    }
+
+    public function testFloorNegativeBetweenZeroAndMinusOne(): void
+    {
+        self::assertSame('-1.00000000', Bc::floor('-0.5'));
+    }
+
+    public function testFloorIntegerValueUnchanged(): void
+    {
+        self::assertSame('-3.00000000', Bc::floor('-3.00000000'));
+    }
+
+    public function testFloorTinyFractionBeyondScale(): void
+    {
+        self::assertSame('-1.00', Bc::floor('-0.000000001', 2));
+    }
+
+    public function testCeilPositive(): void
+    {
+        self::assertSame('2.00000000', Bc::ceil('1.1'));
+    }
+
+    public function testCeilNegative(): void
+    {
+        self::assertSame('-1.00000000', Bc::ceil('-1.9'));
+    }
+
+    public function testCeilNegativeBetweenZeroAndMinusOne(): void
+    {
+        self::assertSame('0.00000000', Bc::ceil('-0.5'));
+    }
+
+    public function testCeilIntegerValueUnchanged(): void
+    {
+        self::assertSame('3.00000000', Bc::ceil('3.00000000'));
+    }
+
+    public function testCeilCustomScale(): void
+    {
+        self::assertSame('2.0', Bc::ceil('1.01', 1));
+    }
+
+    public function testFloorThrowsOnNonNumericInput(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        /** @phpstan-ignore-next-line */
+        Bc::floor('x');
+    }
+
     // ── scale ─────────────────────────────────────────────────────────────────
 
     public function testScalePadsShortDecimals(): void
